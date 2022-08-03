@@ -11,9 +11,10 @@ import android.content.res.Resources;
  * compatibility.
  */
 public class XResourcesSuperClass extends Resources {
-	/** Dummy, will never be called (objects are transferred to this class only). */
-	protected XResourcesSuperClass() {
-		super(null, null, null);
-		throw new UnsupportedOperationException();
-	}
+    /** Dummy, will never be called (objects are transferred to this class only). */
+    protected XResourcesSuperClass() {
+        //Resources(AssetManager assets, DisplayMetrics metrics, Configuration config)
+        super(null, null, null);
+        throw new UnsupportedOperationException();
+    }
 }

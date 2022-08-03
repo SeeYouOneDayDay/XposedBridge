@@ -1,88 +1,16 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package external.org.apache.commons.lang3.reflect;
+package uts;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Member;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import external.org.apache.commons.lang3.ClassUtils;
-
 /**
- * Contains common code for working with Methods/Constructors, extracted and
- * refactored from <code>MethodUtils</code> when it was imported from Commons
- * BeanUtils.
+ * Contains common code for working with {@link Method Methods}/{@link Constructor Constructors},
+ * extracted and refactored from { MethodUtils} when it was imported from Commons BeanUtils.
  *
  * @since 2.5
- * @version $Id: MemberUtils.java 1143537 2011-07-06 19:30:22Z joehni $
  */
-public abstract class MemberUtils {
-    // TODO extract an interface to implement compareParameterSets(...)?
-
-    private static final int ACCESS_TEST = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
-
-    /** Array of primitive number types ordered by "promotability" */
-    private static final Class<?>[] ORDERED_PRIMITIVE_TYPES = { Byte.TYPE, Short.TYPE,
-            Character.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE };
-
-    /**
-     * XXX Default access superclass workaround
-     *
-     * When a public class has a default access superclass with public members,
-     * these members are accessible. Calling them from compiled code works fine.
-     * Unfortunately, on some JVMs, using reflection to invoke these members
-     * seems to (wrongly) prevent access even when the modifier is public.
-     * Calling setAccessible(true) solves the problem but will only work from
-     * sufficiently privileged code. Better workarounds would be gratefully
-     * accepted.
-     * @param o the AccessibleObject to set as accessible
-     */
-    static void setAccessibleWorkaround(AccessibleObject o) {
-        if (o == null || o.isAccessible()) {
-            return;
-        }
-        Member m = (Member) o;
-        if (Modifier.isPublic(m.getModifiers())
-                && isPackageAccess(m.getDeclaringClass().getModifiers())) {
-            try {
-                o.setAccessible(true);
-            } catch (SecurityException e) { // NOPMD
-                // ignore in favor of subsequent IllegalAccessException
-            }
-        }
-    }
-
-    /**
-     * Returns whether a given set of modifiers implies package access.
-     * @param modifiers to test
-     * @return true unless package/protected/private modifier detected
-     */
-    static boolean isPackageAccess(int modifiers) {
-        return (modifiers & ACCESS_TEST) == 0;
-    }
-
-    /**
-     * Returns whether a Member is accessible.
-     * @param m Member to check
-     * @return true if <code>m</code> is accessible
-     */
-    static boolean isAccessible(Member m) {
-        return m != null && Modifier.isPublic(m.getModifiers()) && !m.isSynthetic();
-    }
+public final class MemberUtils {
 
     /**
      * Compares the relative fitness of two sets of parameter types in terms of
@@ -121,14 +49,14 @@ public abstract class MemberUtils {
     }
 
     /**
-     * Gets the number of steps required needed to turn the source class into
+     * Gets the number of steps needed to turn the source class into
      * the destination class. This represents the number of steps in the object
      * hierarchy graph.
      * @param srcClass The source class
      * @param destClass The destination class
      * @return The cost of transforming an object
      */
-    private static float getObjectTransformationCost(Class<?> srcClass, Class<?> destClass) {
+    private static float getObjectTransformationCost(Class<?> srcClass, final Class<?> destClass) {
         if (destClass.isPrimitive()) {
             return getPrimitivePromotionCost(srcClass, destClass);
         }
@@ -147,7 +75,7 @@ public abstract class MemberUtils {
             srcClass = srcClass.getSuperclass();
         }
         /*
-         * If the destination class is null, we've travelled all the way up to
+         * If the destination class is null, we've traveled all the way up to
          * an Object match. We'll penalize this by adding 1.5 to the cost.
          */
         if (srcClass == null) {
@@ -164,6 +92,9 @@ public abstract class MemberUtils {
      * @return The cost of promoting the primitive
      */
     private static float getPrimitivePromotionCost(final Class<?> srcClass, final Class<?> destClass) {
+        if (srcClass == null) {
+            return 1.5f;
+        }
         float cost = 0.0f;
         Class<?> cls = srcClass;
         if (!cls.isPrimitive()) {
@@ -182,4 +113,11 @@ public abstract class MemberUtils {
         return cost;
     }
 
+    private static final int ACCESS_TEST = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
+
+    /** Array of primitive number types ordered by "promotability" */
+    private static final Class<?>[] ORDERED_PRIMITIVE_TYPES = {Byte.TYPE, Short.TYPE,
+            Character.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE};
+
 }
+
